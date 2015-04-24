@@ -1,0 +1,588 @@
+<!-- Written By: Matthew Sherman -->
+
+<!-- Page Templates -->
+<template name="home">
+  <head>
+    <title>Tune Suggest</title>
+  </head>
+
+  <body>
+    <div class="container">
+      <header>
+        <link rel="icon" sizes="16x16 32x32" href="/favicon.ico?v=2">
+        <img src="banner2.png" alt="Tune Suggest" id="banner" height="60" width="234">
+
+        {{>loginButtons}}
+        <br><br>
+        {{#if currentUser}}
+          <a href="{{pathFor 'profile'}}">My Rated Artists</a>
+          &nbsp;&nbsp;
+          <a href="{{pathFor 'suggestions'}}">My Suggestions</a>
+          &nbsp;&nbsp;
+          <a href="{{pathFor 'database'}}">Artist Database</a>
+        {{/if}}
+      </header>
+
+      <div class="container2">
+        <h3 align="center">Latest Ratings</h3>
+        {{#if isTasksCompleted}}
+          {{#each lastRatings}}
+            {{this.name}}: {{this.rating}}<br>
+          {{/each}}
+        {{else}}
+          <p align="center"><img src="loading.gif" alt="Loading..." id="loading" height="50" width="50"></p>
+        {{/if}}
+      </div>
+      <br>
+      <h4>I wanted to thank everyone who contributed ratings to this little project, and thank those
+        who contributed ideas and forced me to learn how to sanitize inputs by breaking it. I've
+        decided that the project WILL go on after I graduate, and be released as version 2.0.
+        If anyone would like to contribute, whether it be ideas or as a developer, let me know.</h4><br>
+
+        <h3>Some things coming in 2.0:</h3>
+        <ul>
+          <li>Genres</li>
+          <li>Artist Pages</li>
+          <li>Album/Song Recommendations</li>
+          <li>Faster Suggestion Times</li>
+          <li>Completely overhauled UI</li>
+          <li>Backend completely rebuilt from the ground up</li>
+          <li>Expanded User Pages</li>
+          <li>Search for Artists/Users</li>
+          <li>Password Recovery</li>
+        </ul><br>
+
+      <div class="container6">
+        <h3 align="center">Highest Rated Artists on Tune Suggest:</h3>
+        {{#if isBandsCompleted}}
+          <ol>
+            {{#each bestBands}}
+              {{> best}}
+            {{/each}}
+          </ol>
+        {{else}}
+          <p align="center"><img src="loading.gif" alt="Loading..." id="loading" height="50" width="50"></p>
+        {{/if}}
+      </div><br>
+      <div class="container3">
+        <h4>Online users: [
+          {{#each onlineUsers}}
+            &nbsp;<a href="{{pathFor route='userpage' user=this.username}}">{{this.username}}</a>
+          {{/each}}&nbsp;]</h4>
+      </div>
+      <br>
+
+      <p align="center" title="April 22nd, 2015">TuneSuggest v1.70 Final | Matthew Sherman</p><br>
+    </div>
+  </body>
+</template>
+
+<template name="profile">
+  <head>
+    <title>Tune Suggest</title>
+  </head>
+
+  <body>
+    <div class="container">
+      <header>
+        <h1>Your Rated Artists</h1>
+
+        {{>loginButtons}}
+        <br>
+        <a href="{{pathFor 'home'}}">Home</a>
+        &nbsp;&nbsp;
+        <a href="{{pathFor 'suggestions'}}">My Suggestions</a>
+        &nbsp;&nbsp;
+        <a href="{{pathFor 'database'}}">Artist Database</a>
+        <br><br>
+        <div class="container4">
+          <div class="container8">
+            <h3>{{userInfo}}</h3>
+          </div>
+          <h4>
+            Number of Ratings: {{numRatings}}
+            <span class="right">
+              {{#if hasAlike}}
+                Most Alike User:
+                <a
+                  href="{{pathFor route='userpage' user=alikeUser}}"
+                  title="Look At This User's Ratings"
+                  id="userLink">{{alikeUser}}
+                </a>
+              {{else}}
+                Most Alike User: None
+              {{/if}}
+            </span>
+          </h4>
+        </div>
+        <br>
+        <form class="new-task">
+          {{>search}}
+          <!--Your move, asshole-->
+          <select name="rating" id="rateBox" required>
+            <option value="">Rate</option>
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+            <option>4</option>
+            <option>5</option>
+            <option>6</option>
+            <option>7</option>
+            <option>8</option>
+            <option>9</option>
+            <option>10</option>
+          </select>
+          <input type="submit" id="submitButton" value="Submit">
+        </form>
+        <br>
+      </header>
+      {{#unless numRatings}}
+        <br>
+        <h3 align="center">To begin, enter some of your favorite music artists!</h3>
+      {{else}}
+      <div class="container3">
+        &nbsp;<span class="sorting-arrow">{{ratingArrow}}</span>
+        <input type="button" class="sortByRating" id="sortNameButton" value="Rating" title="Sort By Rating">
+        <span class="sorting-arrow">{{nameArrow}}</span>
+        <input type="button" class="sortByName" id="sortRatingButton" value="Name" title="Sort By Name">
+      </div>
+      <ul>
+        {{#each tasks}}
+          {{> task}}
+        {{/each}}
+      </ul>
+      {{/unless}}
+    </div>
+  </body>
+</template>
+
+<template name="database">
+  <head>
+    <title>Tune Suggest</title>
+  </head>
+
+  <body class="body-fixed">
+    <div class="container">
+      <header class="fixed">
+        <h1>All Artists in Database</h1>
+
+        {{>loginButtons}}
+        <br>
+        <a href="{{pathFor 'home'}}">Home</a>
+        &nbsp;&nbsp;
+        {{#if currentUser}}
+          <a href="{{pathFor 'profile'}}" id="profileLink">My Rated Artists</a>
+        {{/if}}
+        &nbsp;&nbsp;
+        <a href="{{pathFor 'suggestions'}}">My Suggestions</a>
+        <h4 align="center">
+          <a href="{{pathFor 'database' hash='Num'}}">#</a> |
+          <a href="{{pathFor 'database' hash='A'}}">A</a> |
+          <a href="{{pathFor 'database' hash='B'}}">B</a> |
+          <a href="{{pathFor 'database' hash='C'}}">C</a> |
+          <a href="{{pathFor 'database' hash='D'}}">D</a> |
+          <a href="{{pathFor 'database' hash='E'}}">E</a> |
+          <a href="{{pathFor 'database' hash='F'}}">F</a> |
+          <a href="{{pathFor 'database' hash='G'}}">G</a> |
+          <a href="{{pathFor 'database' hash='H'}}">H</a> |
+          <a href="{{pathFor 'database' hash='I'}}">I</a> |
+          <a href="{{pathFor 'database' hash='J'}}">J</a> |
+          <a href="{{pathFor 'database' hash='K'}}">K</a> |
+          <a href="{{pathFor 'database' hash='L'}}">L</a> |
+          <a href="{{pathFor 'database' hash='M'}}">M</a><br>
+          <a href="{{pathFor 'database' hash='N'}}">N</a> |
+          <a href="{{pathFor 'database' hash='O'}}">O</a> |
+          <a href="{{pathFor 'database' hash='P'}}">P</a> |
+          <a href="{{pathFor 'database' hash='Q'}}">Q</a> |
+          <a href="{{pathFor 'database' hash='R'}}">R</a> |
+          <a href="{{pathFor 'database' hash='S'}}">S</a> |
+          <a href="{{pathFor 'database' hash='T'}}">T</a> |
+          <a href="{{pathFor 'database' hash='U'}}">U</a> |
+          <a href="{{pathFor 'database' hash='V'}}">V</a> |
+          <a href="{{pathFor 'database' hash='W'}}">W</a> |
+          <a href="{{pathFor 'database' hash='X'}}">X</a> |
+          <a href="{{pathFor 'database' hash='Y'}}">Y</a> |
+          <a href="{{pathFor 'database' hash='Z'}}">Z</a>
+        </h4>
+      </header>
+      <br>
+      <div class="container7">
+        <h3>Name<span class="right2">Average Rating</span></h3>
+        <ul class="dbList">
+          <!-- <h4>Special</h4>
+          {{#each bandsSpec}}
+            {{> band}}
+          {{/each}} -->
+          <a class="letterHeading" id="Num"><h4>#</h4></a>
+          {{#each bandsNum}}
+            {{> band}}
+          {{/each}}
+          <a class="letterHeading" id="A"><h4>A</h4></a>
+          {{#each bandsA}}
+            {{> band}}
+          {{/each}}
+          <a class="letterHeading" id="B"><h4>B</h4></a>
+          {{#each bandsB}}
+            {{> band}}
+          {{/each}}
+          <a class="letterHeading" id="C"><h4>C</h4></a>
+          {{#each bandsC}}
+            {{> band}}
+          {{/each}}
+          <a class="letterHeading" id="D"><h4>D</h4></a>
+          {{#each bandsD}}
+            {{> band}}
+          {{/each}}
+          <a class="letterHeading" id="E"><h4>E</h4></a>
+          {{#each bandsE}}
+            {{> band}}
+          {{/each}}
+          <a class="letterHeading" id="F"><h4>F</h4></a>
+          {{#each bandsF}}
+            {{> band}}
+          {{/each}}
+          <a class="letterHeading" id="G"><h4>G</h4></a>
+          {{#each bandsG}}
+            {{> band}}
+          {{/each}}
+          <a class="letterHeading" id="H"><h4>H</h4></a>
+          {{#each bandsH}}
+            {{> band}}
+          {{/each}}
+          <a class="letterHeading" id="I"><h4>I</h4></a>
+          {{#each bandsI}}
+            {{> band}}
+          {{/each}}
+          <a class="letterHeading" id="J"><h4>J</h4></a>
+          {{#each bandsJ}}
+            {{> band}}
+          {{/each}}
+          <a class="letterHeading" id="K"><h4>K</h4></a>
+          {{#each bandsK}}
+            {{> band}}
+          {{/each}}
+          <a class="letterHeading" id="L"><h4>L</h4></a>
+          {{#each bandsL}}
+            {{> band}}
+          {{/each}}
+          <a class="letterHeading" id="M"><h4>M</h4></a>
+          {{#each bandsM}}
+            {{> band}}
+          {{/each}}
+          <a class="letterHeading" id="N"><h4>N</h4></a>
+          {{#each bandsN}}
+            {{> band}}
+          {{/each}}
+          <a class="letterHeading" id="O"><h4>O</h4></a>
+          {{#each bandsO}}
+            {{> band}}
+          {{/each}}
+          <a class="letterHeading" id="P"><h4>P</h4></a>
+          {{#each bandsP}}
+            {{> band}}
+          {{/each}}
+          <a class="letterHeading" id="Q"><h4>Q</h4></a>
+          {{#each bandsQ}}
+            {{> band}}
+          {{/each}}
+          <a class="letterHeading" id="R"><h4>R</h4></a>
+          {{#each bandsR}}
+            {{> band}}
+          {{/each}}
+          <a class="letterHeading" id="S"><h4>S</h4></a>
+          {{#each bandsS}}
+            {{> band}}
+          {{/each}}
+          <a class="letterHeading" id="T"><h4>T</h4></a>
+          {{#each bandsT}}
+            {{> band}}
+          {{/each}}
+          <a class="letterHeading" id="U"><h4>U</h4></a>
+          {{#each bandsU}}
+            {{> band}}
+          {{/each}}
+          <a class="letterHeading" id="V"><h4>V</h4></a>
+          {{#each bandsV}}
+            {{> band}}
+          {{/each}}
+          <a class="letterHeading" id="W"><h4>W</h4></a>
+          {{#each bandsW}}
+            {{> band}}
+          {{/each}}
+          <a class="letterHeading" id="X"><h4>X</h4></a>
+          {{#each bandsX}}
+            {{> band}}
+          {{/each}}
+          <a class="letterHeading" id="Y"><h4>Y</h4></a>
+          {{#each bandsY}}
+            {{> band}}
+          {{/each}}
+          <a class="letterHeading" id="Z"><h4>Z</h4></a>
+          {{#each bandsZ}}
+            {{> band}}
+          {{/each}}
+        </ul>
+      </div>
+    </div>
+  </body>
+</template>
+
+<template name="suggestions">
+  <head>
+    <title>Tune Suggest</title>
+  </head>
+
+  <body>
+    <div class="container">
+      <header>
+        <h1>Your Suggestions</h1>
+
+        {{>loginButtons}}
+        <br>
+        {{#if currentUser}}
+          <a href="{{pathFor 'home'}}">Home</a>
+          &nbsp;&nbsp;
+          <a href="{{pathFor 'profile'}}">My Rated Artists</a>
+          &nbsp;&nbsp;
+          <a href="{{pathFor 'database'}}">Artist Database</a>
+        {{/if}}
+      </header>
+      {{#if currentUser}}
+        <div class="container6">
+          <h3 align="center">Your Top 5 Suggestions</h3>
+            <ol>
+              {{#each suggestions}}
+                {{> suggestion}}
+              {{else}}
+                <h4 id="noSugg">You currently have no suggestions. This may be because you need
+                more highly rated artists on your My Rated Artists page,
+                or because you have already rated all of your current suggestions.
+                Please check back soon for more!</h4>
+              {{/each}}
+            </ol>
+        </div>
+        <div class="container7">
+          <h3 align="center">Your Ignored Artists</h3>
+          <ul class="dbList">
+            {{#each ignored}}
+              {{> ignore}}
+            {{/each}}
+          </ul>
+        </div>
+      {{/if}}
+    </div>
+  </body>
+</template>
+
+<template name="admin">
+  <head>
+    <title>Tune Suggest</title>
+  </head>
+
+  <body>
+    <div class="container">
+      <header>
+        <h1>Administrator</h1>
+        {{>loginButtons}}
+        <br>
+        {{#if currentUser}}
+          <a href="{{pathFor 'home'}}">Home</a>
+        {{/if}}
+      </header>
+        <div class="container7">
+          <h3 align="center" id="adminUser">Users ({{usersCount}})</h3>
+          <form class="reset-password">
+            <input type="text" id="cpUserPass" name="user" placeholder="Enter user..." required>
+            <input type="text" id="cpUserPass" name="password" placeholder="Change password..." required>
+            <input type="submit" id="submitButton2" value="Submit">
+          </form>
+          <br><span class="adminLeft">Username (# of Ratings)</span><br>
+          <ul class="dbList">
+            {{#each stats}}
+              {{> stat}}
+            {{/each}}
+          </ul>
+        </div>
+        <div class="container7">
+          <h3 align="center" id="adminRatings">Ratings ({{ratingsCount}})</h3>
+            <ul class="dbList">
+              {{#each stats2}}
+                {{> stat2}}
+              {{/each}}
+            </ul>
+        </div>
+    </div>
+  </body>
+</template>
+
+<template name="userpage">
+  <head>
+    <title>Tune Suggest</title>
+  </head>
+  <body>
+    <div class="container">
+      <header>
+        <br><br>
+        {{>loginButtons}}
+        <br>
+        <a href="{{pathFor 'home'}}">Home</a>
+        &nbsp;&nbsp;
+        <a href="{{pathFor 'profile'}}">My Rated Artists</a>
+        &nbsp;&nbsp;
+        <a href="{{pathFor 'suggestions'}}">My Suggestions</a>
+        &nbsp;&nbsp;
+        <a href="{{pathFor 'database'}}">Artist Database</a>
+        <br><br>
+        <div class="container4">
+          <div class="container8">
+            <h3>{{userInfo}}</h3>
+          </div>
+          <h4>Number of Ratings: {{numRatings}}
+            <span class="right">
+              {{#if hasAlike}}
+                Most Alike User:
+                <a
+                  href="{{pathFor route='userpage' user=alikeUser.alikeUser}}"
+                  title="Look At This User's Ratings"
+                  id="userLink">{{alikeUser.alikeUser}}
+                </a>
+              {{else}}
+                Most Alike User: None
+              {{/if}}
+            </span>
+          </h4>
+        </div>
+        <br>
+      </header>
+      <div class="container7">
+      <ul class="dbList">
+        <span class="left">Artist Name</span><span class="right2">Rating</span><br>
+        {{#each tasks}}
+          {{> usertask}}
+        {{/each}}
+      </ul>
+    </div>
+    </div>
+  </body>
+</template>
+
+<!-- Yield Templates -->
+
+<template name="task">
+  {{#if isOwner}}
+    <li>
+      <span class="before-after-rating">
+      {{#if isOne}}<button class="rate-down" title="Decrease Rating">&DoubleDownArrow;</button>
+      {{else}}<button class="rate-down" disabled>&DoubleDownArrow;</button>{{/if}}</span>
+      <span class="rating-number">{{rating}}</span>
+      <span class="before-after-rating">
+      {{#if isTen}}<button class="rate-up" title="Increase Rating">&DoubleUpArrow;</button>
+      {{else}}<button class="rate-up" disabled>&DoubleUpArrow;</button>{{/if}}
+      <a
+        href="https://www.youtube.com/results?search_query={{name}}"
+        target="_blank"
+        title="Youtube Link">&nbsp;
+      {{name}}</a></span>
+      <button class="delete" title="Delete Rating">&times;</button>
+    </li>
+  {{/if}}
+</template>
+
+<template name="usertask">
+    <li class="band">
+      <a
+        href="https://www.youtube.com/results?search_query={{name}}"
+        target="_blank"
+        title="Youtube Link">&nbsp;{{name}}</a>
+      <span class="right2" title="Rating">{{rating}}</span>
+    </li>
+</template>
+
+<template name="band">
+  <li class="band">
+    <span class="text"><a
+      href="https://www.youtube.com/results?search_query={{name}}"
+      target="_blank"
+      title="Youtube Link">{{name}}</a></span>
+    <span class="right2" title="Artist Average Rating">{{average}}</span>
+      {{#if isAdmin}}
+      <br><form class="band-update">
+        <input type="text" name="name" placeholder="Edit name..." required>
+      </form>
+      {{/if}}
+  </li>
+</template>
+
+<template name="best">
+  <li class="best">
+    <span class="left"><a
+      href="https://www.youtube.com/results?search_query={{name}}"
+      target="_blank"
+      title="Youtube Link">{{name}}</a></span>
+    <span class="right" title="Artist Average Rating">{{average}} based on {{ratingCount}} ratings</span>
+  </li>
+</template>
+
+<template name="suggestion">
+  <li class="best">
+    <span class="text2"><a
+      href="https://www.youtube.com/results?search_query={{this}}"
+      target="_blank"
+      title="Youtube Link">{{this}}
+    </a>
+    <a
+      href="https://en.wikipedia.org/wiki/{{this}}"
+      target="_blank"
+      title="Wikipedia Link"
+      id="wikiLink"> Wiki
+    </a></span>
+    <span class="right">
+      <form class="rated-suggestion">
+        <input type="hidden" name="name" id="hiddenName" value="{{this}}">
+          <select name="rating" id="rateBox2" required>
+            <option value="">Rate</option>
+            <option>1</option>
+            <option>2</option>
+            <option>3</option>
+            <option>4</option>
+            <option>5</option>
+            <option>6</option>
+            <option>7</option>
+            <option>8</option>
+            <option>9</option>
+            <option>10</option>
+          </select>
+        <input type="submit" id="submitButton2" value="Submit">
+      </form>
+      <form class="ignore" title="Ignore Artist">
+        <input type="hidden" name="name" id="hiddenName" value="{{this}}">
+        <input type="submit" class="delete" value="&times;">
+      </form>
+    </span>
+  </li>
+  <br>
+</template>
+
+<template name="ignore">
+  <li class="band">
+    {{name}}<button class="delete" id="ignoreX" title="Unignore Artist">&times;</button>
+  </li>
+</template>
+
+<template name="stat">
+  <li class="band">
+      {{this}}
+  </li>
+</template>
+
+<template name="stat2">
+  <li class="band">
+    <span class="admin-name">{{name}}</span>
+    <span class="admin-rating">{{rating}}</span>
+    <span class="admin-user">{{username}}</span>
+  </li>
+</template>
+
+<template name="search">
+  <input type="text" name="name" id="searchBox" placeholder="Enter A New Artist..." required>
+</template>
